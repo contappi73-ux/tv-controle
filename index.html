@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TV Sandra & Norberto - Painel de Controle</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  body { background: #0b0c10; color: #fff; display: flex; justify-content: center; padding: 16px; min-height: 100vh; }
+  .card { background: #151821; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; width: 100%; max-width: 450px; padding: 22px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+  .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.15); color: #60a5fa; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; margin-bottom: 12px; }
+  .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
+  h1 { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+  p.sub { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 18px; }
+  .tabs { display: flex; gap: 6px; background: #0c0d12; padding: 4px; border-radius: 14px; margin-bottom: 18px; }
+  .tab { flex: 1; text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 600; border-radius: 10px; cursor: pointer; color: rgba(255,255,255,0.6); transition: 0.2s; }
+  .tab.active { background: #2563eb; color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,0.4); }
+  .section { display: none; }
+  .section.active { display: block; }
+  label { font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+  textarea { width: 100%; background: #0b0c10; border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; color: #fff; padding: 12px; font-size: 15px; outline: none; resize: none; margin-bottom: 14px; }
+  textarea:focus { border-color: #3b82f6; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .opt-btn { background: #1d212c; border: 2px solid transparent; border-radius: 10px; padding: 10px 6px; text-align: center; cursor: pointer; font-size: 12px; color: rgba(255,255,255,0.7); transition: 0.2s; }
+  .opt-btn.active { border-color: #3b82f6; background: rgba(59,130,246,0.15); color: #fff; font-weight: 600; }
+  .btn-action { width: 100%; background: #2563eb; color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-action:active { transform: scale(0.98); background: #1d4ed8; }
+  .btn-mic { width: 100%; height: 110px; border-radius: 16px; background: #1e293b; border: 2px dashed rgba(255,255,255,0.2); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 12px; }
+  .btn-mic.recording { background: #dc2626; border: 2px solid #ef4444; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); } 70% { box-shadow: 0 0 0 15px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+  .toast { margin-top: 14px; padding: 10px; border-radius: 10px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #10b981; font-size: 12px; text-align: center; display: none; }
+  .notice-duck { background: rgba(255,179,0,0.1); border-left: 3px solid #ffb300; padding: 8px 10px; border-radius: 6px; font-size: 11px; color: #fcd34d; margin-bottom: 14px; line-height: 1.4; }
+  .rustdesk-box { margin-top: 20px; padding: 14px; background: #0c0d12; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-size: 12px; line-height: 1.6; }
+  .rustdesk-box strong { color: #fff; }
+  .code-badge { background: #222634; color: #38bdf8; font-family: monospace; font-size: 13px; font-weight: 700; padding: 2px 7px; border-radius: 6px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="badge"><div class="dot"></div>PHILIPS GOOGLE TV &bull; ONLINE</div>
+  <h1>Controle Sandra & Norberto</h1>
+  <p class="sub">Sistema criado por João &bull; Acesso Global (Wi-Fi e 4G/5G)</p>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('alert')">📢 Aviso</div>
+    <div class="tab" onclick="showTab('speak')">🗣️ Falar</div>
+    <div class="tab" onclick="showTab('mic')">🎙️ Walkie-Talkie</div>
+  </div>
+
+  <!-- ABA 1: AVISO TEXTO -->
+  <div class="section active" id="sec-alert">
+    <label>Mensagem na Tela (5 segundos)</label>
+    <textarea id="alert-msg" rows="3" placeholder="Ex: O almoço tá pronto! / Sandra, vem cá!"></textarea>
+    <label>Posição da Notificação</label>
+    <div class="options">
+      <div class="opt-btn active" id="btn-tr" onclick="setAlertPos('top_right')">↗ Canto Superior</div>
+      <div class="opt-btn" id="btn-ct" onclick="setAlertPos('center')">⬛ Centro (Tela Preta)</div>
+    </div>
+    <button class="btn-action" onclick="sendAlert()">📢 Enviar Aviso para a TV</button>
+  </div>
+
+  <!-- ABA 2: FALAR TEXTO -->
+  <div class="section" id="sec-speak">
+    <div class="notice-duck">⚡ <b>Prioridade Automática:</b> O YouTube/SmartTube pausa sozinho enquanto a TV fala e despausa quando terminar!</div>
+    <label>O que a TV deve falar em voz alta?</label>
+    <textarea id="speak-msg" rows="3" placeholder="Ex: Sandra, por favor venha até aqui. Norberto, olha o telefone."></textarea>
+    <button class="btn-action" onclick="sendSpeak()">🗣️ Falar na TV em Voz Alta</button>
+  </div>
+
+  <!-- ABA 3: WALKIE-TALKIE REAL -->
+  <div class="section" id="sec-mic">
+    <div class="notice-duck">⚡ <b>Áudio Real:</b> Grava sua voz e toca na TV na hora! O que estiver tocando pausa e depois volta sozinho.</div>
+    <div class="btn-mic" id="mic-btn" onclick="handleMicClick()">
+      <span id="mic-icon" style="font-size:32px;">🎙️</span>
+      <span id="mic-text" style="font-weight:600;font-size:14px;">Toque para Gravar Voz</span>
+    </div>
+    <input type="file" id="native-audio" accept="audio/*" capture="microphone" style="display:none" onchange="handleNativeAudio(this)">
+    <button class="btn-action" id="btn-send-audio" style="display:none;background:#10b981;" onclick="sendRecordedAudio()">🚀 Enviar Áudio Gravado para TV</button>
+  </div>
+
+  <div class="toast" id="toast">✓ Enviado com sucesso para a TV!</div>
+
+  <!-- RUSTDESK BOX -->
+  <div class="rustdesk-box">
+    <strong>📱 Ver a Tela da TV de Qualquer Lugar:</strong><br>
+    Abra o aplicativo <b>RustDesk</b> no seu celular:<br>
+    ID da TV: <span class="code-badge">1 914 035 398</span><br>
+    Senha Permanente: <span class="code-badge">Jlgd@2810</span>
+  </div>
+</div>
+
+<script>
+  const TOPIC = 'joao_tv_philips_notificacoes';
+  const CLOUD_URL = 'https://ntfy.sh/' + TOPIC;
+  let selectedPos = 'top_right';
+
+  function showTab(name) {
+    const tabs = ['alert', 'speak', 'mic'];
+    tabs.forEach((t, i) => {
+      document.querySelectorAll('.tab')[i].classList.toggle('active', t === name);
+      document.getElementById('sec-' + t).classList.toggle('active', t === name);
+    });
+  }
+
+  function setAlertPos(p) {
+    selectedPos = p;
+    document.getElementById('btn-tr').classList.toggle('active', p === 'top_right');
+    document.getElementById('btn-ct').classList.toggle('active', p === 'center');
+  }
+
+  function notifySuccess(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = '✓ ' + msg;
+    toast.style.display = 'block';
+    setTimeout(() => toast.style.display = 'none', 4000);
+  }
+
+  function sendAlert() {
+    const msg = document.getElementById('alert-msg').value.trim();
+    if (!msg) { alert('Digite uma mensagem!'); return; }
+    
+    // Send as JSON body to avoid ISO-8859-1 header errors
+    fetch('https://ntfy.sh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: TOPIC,
+        title: 'AVISO',
+        message: msg,
+        tags: [selectedPos]
+      })
+    }).then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      notifySuccess('Aviso enviado para a TV!');
+      document.getElementById('alert-msg').value = '';
+    }).catch(e => alert('Erro ao enviar aviso: ' + e));
+  }
+
+  function sendSpeak() {
+    const msg = document.getElementById('speak-msg').value.trim();
+    if (!msg) { alert('Digite o texto para a TV falar!'); return; }
+    
+    // Send as JSON body to allow any accents/characters safely
+    fetch('https://ntfy.sh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: TOPIC,
+        title: 'Voz de Joao',
+        message: msg,
+        tags: ['voice']
+      })
+    }).then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      notifySuccess('Fala enviada! A TV vai pausar o vídeo e falar.');
+      document.getElementById('speak-msg').value = '';
+    }).catch(e => alert('Erro ao enviar fala: ' + e));
+  }
+
+  // Microfone / Walkie Talkie
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let recordedBlob = null;
+  let recordTimer = null;
+  let recordSeconds = 0;
+
+  function handleMicClick() {
+    if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+      toggleMediaRecorder();
+    } else {
+      // Fallback for HTTP (insecure context on mobile IP): open native audio recorder
+      document.getElementById('native-audio').click();
+    }
+  }
+
+  function handleNativeAudio(input) {
+    if (input.files && input.files[0]) {
+      recordedBlob = input.files[0];
+      const sizeKb = Math.round(recordedBlob.size / 1024);
+      document.getElementById('mic-text').innerText = 'Áudio Gravado (' + sizeKb + ' KB) ✓';
+      document.getElementById('btn-send-audio').style.display = 'flex';
+      notifySuccess('Áudio gravado! Clique em Enviar para TV.');
+    }
+  }
+
+  async function toggleMediaRecorder() {
+    const micBtn = document.getElementById('mic-btn');
+    const micText = document.getElementById('mic-text');
+    const btnSend = document.getElementById('btn-send-audio');
+
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      clearInterval(recordTimer);
+      micBtn.classList.remove('recording');
+      micText.innerText = 'Gravação Concluída (' + recordSeconds + 's)';
+      btnSend.style.display = 'flex';
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        recordedBlob = null;
+        btnSend.style.display = 'none';
+        recordSeconds = 0;
+
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+          recordedBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+          stream.getTracks().forEach(t => t.stop());
+        };
+
+        mediaRecorder.start();
+        micBtn.classList.add('recording');
+        micText.innerText = 'Gravando... 0s (Clique para Parar)';
+        recordTimer = setInterval(() => {
+          recordSeconds++;
+          micText.innerText = 'Gravando... ' + recordSeconds + 's (Clique para Parar)';
+        }, 1000);
+      } catch (err) {
+        // If getUserMedia permission was blocked, trigger native input fallback
+        document.getElementById('native-audio').click();
+      }
+    }
+  }
+
+  function sendRecordedAudio() {
+    if (!recordedBlob) { alert('Grave um áudio primeiro!'); return; }
+    const btnSend = document.getElementById('btn-send-audio');
+    btnSend.innerText = 'Enviando áudio...';
+
+    // Strictly ASCII headers to prevent ISO-8859-1 errors
+    fetch(CLOUD_URL, {
+      method: 'PUT',
+      body: recordedBlob,
+      headers: {
+        'Title': 'Voz de Joao',
+        'Tags': 'voice,audio',
+        'Filename': 'walkie_talkie.mp4'
+      }
+    }).then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      notifySuccess('Áudio enviado! Tocando na TV com prioridade.');
+      btnSend.style.display = 'none';
+      btnSend.innerText = '🚀 Enviar Áudio Gravado para TV';
+      document.getElementById('mic-text').innerText = 'Toque para Gravar Voz';
+      recordedBlob = null;
+      document.getElementById('native-audio').value = '';
+    }).catch(e => {
+      alert('Erro ao enviar áudio: ' + e);
+      btnSend.innerText = '🚀 Enviar Áudio Gravado para TV';
+    });
+  }
+</script>
+</body>
+</html>
